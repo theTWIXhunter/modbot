@@ -1,0 +1,6 @@
+# Environment variables
+.env
+
+# Data files (except template)
+data/*
+!data/shared-channels.json.template
