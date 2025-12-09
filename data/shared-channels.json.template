@@ -1,0 +1,26 @@
+{
+  "counting_webhooks": [
+    { "channel_id": "PUTFIRSTSERVER_CHANNELID_HERE", "url": "https://discord.com/api/webhooks/WEBHOOKURLHERE" },
+    { "channel_id": "PUTFIRSTSERVER_CHANNELID_HERE", "url": "https://discord.com/api/webhooks/WEBHOOKURLHERE" }
+  ],
+  "counting": [
+    "PUTFIRSTSERVER_CHANNELID_HERE",
+    "1406676598224326799"
+  ],
+  "citieschain_webhooks": [
+    { "channel_id": "PUTFIRSTSERVER_CHANNELID_HERE", "url": "https://discord.com/api/webhooks/WEBHOOKURLHERE" },
+    { "channel_id": "PUTFIRSTSERVER_CHANNELID_HERE", "url": "https://discord.com/api/webhooks/WEBHOOKURLHERE" }
+  ],
+  "citieschain": [
+    "PUTFIRSTSERVER_CHANNELID_HERE",
+    "PUTFIRSTSERVER_CHANNELID_HERE"
+  ]
+    "guessthenumber_webhooks": [
+    { "channel_id": "PUTFIRSTSERVER_CHANNELID_HERE", "url": "https://discord.com/api/webhooks/WEBHOOKURLHERE" },
+    { "channel_id": "PUTFIRSTSERVER_CHANNELID_HERE", "url": "https://discord.com/api/webhooks/WEBHOOKURLHERE" }
+  ],
+  "guessthenumber": [
+    "PUTFIRSTSERVER_CHANNELID_HERE",
+    "PUTFIRSTSERVER_CHANNELID_HERE"
+  ]
+}
