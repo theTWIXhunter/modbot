@@ -1,5 +1,5 @@
 module.exports = (client) => {
-  // Auto-role configuration
+  // Auto-role configuration - should add as /data/ file later...
   const AUTO_ROLES = {
     '1229827448754147349': '1277632486272401428', // Old server -> role ID
     '1406513249914191872': '1406540394367549543'  // New server -> role ID
@@ -101,3 +101,4 @@ module.exports = (client) => {
     }
   });
 };
+
