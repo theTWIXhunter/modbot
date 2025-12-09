@@ -97,10 +97,11 @@ module.exports = (client) => {
     // Check if the bot is mentioned
     if (message.mentions.has(client.user)) {
       console.log("BASIC.JS: Bot got pinged, replying with help message")
-      await message.reply("Hello, I am <@1382734172279537734>, see my commands using the discord slash UI!");
+      await message.reply("Hello, I am <@1382734172279537734>, see my commands using the discord slash UI");
     }
   });
 };
+
 
 
 
