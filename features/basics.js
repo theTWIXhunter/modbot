@@ -27,7 +27,7 @@ module.exports = (client) => {
     }
   }
 
-  // Status rotation options - you can customize these
+  // Status rotation options - you can customize these, should add as /data/ later
   const statusOptions = [
     { type: 'Custom', text: 'just eat both twix bars at once, you will be fine' },
     { type: 'Custom', text: 'looking for a host? falixnodes.net' },
@@ -101,4 +101,5 @@ module.exports = (client) => {
     }
   });
 };
+
 
