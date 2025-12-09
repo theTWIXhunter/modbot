@@ -1,3 +1,4 @@
+// I am just testing some sync thing, do not care about this
 module.exports = (client) => {
   // Auto-role configuration - should add as /data/ file later...
   const AUTO_ROLES = {
@@ -101,6 +102,7 @@ module.exports = (client) => {
     }
   });
 };
+
 
 
 
