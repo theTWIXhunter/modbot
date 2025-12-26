@@ -68,7 +68,7 @@ module.exports = function(client) {
 
   client.on('messageReactionAdd', async (reaction, user) => {
     // Debug: messageReactionAdd event fired
-    // console.log('[Starboard] messageReactionAdd event:', reaction.emoji.name, reaction.message.id, user?.tag);
+    console.log('[Starboard] messageReactionAdd event:', reaction.emoji.name, reaction.message.id, user?.tag);
     if (user.bot) return;
     if (reaction.emoji.name !== STAR_EMOJI) return;
 
