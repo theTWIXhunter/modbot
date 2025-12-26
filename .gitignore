@@ -3,4 +3,5 @@
 
 # Data files (except template)
 data/*
+logs/*
 !data/shared-channels.json.template

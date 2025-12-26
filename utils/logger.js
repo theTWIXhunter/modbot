@@ -3,7 +3,7 @@ const path = require('path');
 
 class Logger {
   constructor(options = {}) {
-    this.logDir = options.logDir || path.resolve(__dirname, '..', 'data', 'logs');
+    this.logDir = options.logDir || path.resolve(__dirname, '..', 'logs');
     this.logFile = path.join(this.logDir, this._getLogFileName());
     this.stream = null;
     this._ensureLogDir();
