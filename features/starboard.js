@@ -1,10 +1,45 @@
 const { EmbedBuilder } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
 
 module.exports = function(client) {
   const STARBOARD_CHANNELS = ['1384205905641472091', '1406676757213610134']; // #starboard old & new
   const MEMES_CHANNELS = ['1277135505741320285', '1406517772346982411'];     // #memes old & new
   const BOT_TESTING_CHANNEL = '1383752816006402159'; // #bot-testing
   const STAR_EMOJI = '⭐';
+  const STARBOARD_DATA_FILE = path.join(__dirname, '..', 'data', 'starboard-messages.json');
+
+  // Set to track message IDs that have been posted to the starboard
+  const postedMessages = new Set();
+
+  // Load existing message IDs from disk
+  function loadPostedMessages() {
+    try {
+      if (fs.existsSync(STARBOARD_DATA_FILE)) {
+        const data = JSON.parse(fs.readFileSync(STARBOARD_DATA_FILE, 'utf-8'));
+        data.forEach(id => postedMessages.add(id));
+        console.log(`Loaded ${postedMessages.size} starboard message IDs from disk`);
+      }
+    } catch (err) {
+      console.error('Error loading starboard data:', err);
+    }
+  }
+
+  // Save message IDs to disk
+  function savePostedMessages() {
+    try {
+      const dataDir = path.dirname(STARBOARD_DATA_FILE);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      fs.writeFileSync(STARBOARD_DATA_FILE, JSON.stringify([...postedMessages], null, 2));
+    } catch (err) {
+      console.error('Error saving starboard data:', err);
+    }
+  }
+
+  // Initialize by loading existing data
+  loadPostedMessages();
 
   // Map guilds to their corresponding starboard channels
   const guildToStarboard = {
@@ -39,13 +74,13 @@ module.exports = function(client) {
       const threshold = thresholds[message.channel.id] || 3;
       if (reaction.count < threshold) return;
 
+      // Check if this message has already been posted to the starboard
+      if (postedMessages.has(message.id)) return;
+
       // Get the corresponding starboard channel based on the guild
       const starboardChannelId = guildToStarboard[message.guildId] || STARBOARD_CHANNELS[0];
       const starboardChannel = await client.channels.fetch(starboardChannelId).catch(() => null);
       if (!starboardChannel) return;
-
-      const alreadyPosted = await starboardChannel.messages.fetch({ limit: 100 });
-      if ([...alreadyPosted.values()].some(msg => msg.content.includes(message.id))) return;
 
       const jumpLink = `https://discord.com/channels/${message.guildId}/${message.channel.id}/${message.id}`;
       let description = message.content || '';
@@ -96,6 +131,10 @@ module.exports = function(client) {
       await starboardChannel.send({
         embeds: [embed]
       });
+
+      // Mark this message as posted and save to disk
+      postedMessages.add(message.id);
+      savePostedMessages();
 
     } catch (err) {
       console.error('Error handling star reaction:', err);
