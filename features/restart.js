@@ -52,7 +52,7 @@ async function handleInteraction(interaction, client) {
 }
 
 function setup(client) {
-  client.once('ready', async () => {
+  client.once('clientReady', async () => {
     await unlockChannel(client, countingChannelId, '#counting');
     await unlockChannel(client, citiesChainChannelId, '#cities-chain');
   });

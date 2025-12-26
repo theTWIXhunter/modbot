@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = function(client) {
-  console.log('[Starboard] Feature loaded and initialized');
+  // console.log('[Starboard] Feature loaded and initialized');
   const STARBOARD_CHANNELS = ['1384205905641472091', '1406676757213610134']; // #starboard old & new
   const MEMES_CHANNELS = ['1277135505741320285', '1406517772346982411'];     // #memes old & new
   const BOT_TESTING_CHANNEL = '1383752816006402159'; // #bot-testing
@@ -56,7 +56,7 @@ module.exports = function(client) {
 
   client.on('messageCreate', async (message) => {
     // Debug: messageCreate event fired
-    console.log('[Starboard] messageCreate event:', message.channel.id, message.author?.tag);
+    // console.log('[Starboard] messageCreate event:', message.channel.id, message.author?.tag);
     if (MEMES_CHANNELS.includes(message.channel.id) && !message.author.bot) {
       try {
         await message.react(STAR_EMOJI);
@@ -68,7 +68,7 @@ module.exports = function(client) {
 
   client.on('messageReactionAdd', async (reaction, user) => {
     // Debug: messageReactionAdd event fired
-    console.log('[Starboard] messageReactionAdd event:', reaction.emoji.name, reaction.message.id, user?.tag);
+    // console.log('[Starboard] messageReactionAdd event:', reaction.emoji.name, reaction.message.id, user?.tag);
     if (user.bot) return;
     if (reaction.emoji.name !== STAR_EMOJI) return;
 

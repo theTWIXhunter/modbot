@@ -31,8 +31,8 @@ const allCommands = features
   .filter(f => Array.isArray(f.commands))
   .flatMap(f => f.commands);
 
-// Register all commands once client is ready
-client.once('ready', async () => {
+// Register all commands once client is ready (Discord.js v15+)
+client.once('clientReady', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
   try {
     await client.application.commands.set(allCommands);

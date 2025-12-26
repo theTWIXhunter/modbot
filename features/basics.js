@@ -75,7 +75,7 @@ module.exports = (client) => {
   }
 
   // Set initial status and start rotation when bot is ready
-  client.once('ready', () => {
+  client.once('clientReady', () => {
     updateStatus(); // Set initial status
     setInterval(updateStatus, 60000); // Rotate every 1 minute (60000ms)
   });
