@@ -11,6 +11,7 @@ const path = require('path');
 const loadFeatures = require('./utils/loadFeatures');
 
 // Initialize Discord client with required intents
+const { Partials } = require('discord.js');
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -19,6 +20,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildMembers,
   ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 // Dynamically load all features from the features folder
