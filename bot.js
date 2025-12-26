@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 
 // Initialize logging system first to capture all console output
@@ -21,7 +22,7 @@ const client = new Client({
 });
 
 // Dynamically load all features from the features folder
-const features = loadFeatures(path.join(__dirname, 'features'));
+const features = loadFeatures(path.resolve(__dirname, 'features'));
 
 // Collect all commands from features that provide them
 const allCommands = features
