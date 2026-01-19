@@ -3,6 +3,7 @@ module.exports = (client) => {
   const GUILD_IDS = ['1406513249914191872', '1229827448754147349']; // Both server IDs
   const MODERATOR_ROLE_ID = '1406519855347269693'; // Moderator role ID
   const pingTracker = new Map(); // Map<guildId, Map<userId, { count, lastPing }>>
+  const lowEffortTracker = new Map(); // Map<guildId, Map<userId, { lastType: string, lastTime: number }>>
 
   function isEmoji(str) {
     // Simple emoji regex (covers most cases)
@@ -16,14 +17,34 @@ module.exports = (client) => {
     // Only act in the two guilds
     if (!GUILD_IDS.includes(message.guild?.id)) return;
 
-    // Filter: 1-char messages that are not emoji
-    if (message.content.length === 1 && !isEmoji(message.content)) {
+
+    // Filter: 1-char messages that are not emoji, or messages that are only repeated punctuation (e.g. '...', '!!!', '??', etc)
+    const onlyPunctOrRepeat = /^[\p{P}\p{S}\s]+$/u.test(message.content) || /^([\p{P}\p{S}])\1{1,}$/u.test(message.content);
+    const isLowEffort = (message.content.length === 1 && !isEmoji(message.content)) || onlyPunctOrRepeat;
+
+    // Track consecutive low-effort messages per user per guild
+    const guildId = message.guild.id;
+    if (!lowEffortTracker.has(guildId)) lowEffortTracker.set(guildId, new Map());
+    const userLowEffort = lowEffortTracker.get(guildId);
+    const now = Date.now();
+    if (isLowEffort) {
+      const last = userLowEffort.get(message.author.id);
+      if (last && last.lastType === 'low' && now - last.lastTime < 60000) {
+        // Block second consecutive low-effort message within 1 minute
+        try {
+          await message.delete();
+          await message.channel.send({ content: `${message.author}, please avoid sending multiple low-effort messages in a row.`, allowedMentions: { users: [message.author.id] } });
+        } catch {}
+        return;
+      }
+      userLowEffort.set(message.author.id, { lastType: 'low', lastTime: now });
       try {
         await message.delete();
-      } catch (err) {
-        // Ignore delete errors
-      }
+      } catch (err) {}
       return;
+    } else {
+      // Reset tracker if message is not low-effort
+      userLowEffort.set(message.author.id, { lastType: 'normal', lastTime: now });
     }
 
     // Staff ping logic
