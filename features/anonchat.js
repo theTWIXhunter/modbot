@@ -139,9 +139,10 @@ module.exports = {
             saveData(data);
 
             // Send message via webhook
+            let webhookMessage;
             try {
                 const webhook = new WebhookClient({ id: WEBHOOK_ID, token: WEBHOOK_TOKEN });
-                await webhook.send({
+                webhookMessage = await webhook.send({
                     content: text,
                     username: username,
                 });
@@ -158,7 +159,8 @@ module.exports = {
                     .addFields(
                         { name: 'User', value: `${interaction.user.tag} (${interaction.user.id})` },
                         { name: 'Anon Username', value: username },
-                        { name: 'Message', value: text.length > 1024 ? text.slice(0, 1021) + '...' : text }
+                        { name: 'Message', value: text.length > 1024 ? text.slice(0, 1021) + '...' : text },
+                        { name: 'Message ID', value: webhookMessage.id }
                     )
                     .setTimestamp();
                 modLog.send({ embeds: [embed] }).catch(e => console.error('Error logging anon message:', e));
