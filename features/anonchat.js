@@ -144,7 +144,6 @@ module.exports = {
                 await webhook.send({
                     content: text,
                     username: username,
-                    avatarURL: 'https://i.imgur.com/8b6bK0y.png',
                 });
             } catch (e) {
                 console.error('Error sending anonymous message via webhook:', e);
