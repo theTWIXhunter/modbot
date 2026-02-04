@@ -3,10 +3,17 @@ const path = require('path');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
-const sharedChannels = require('../data/shared-channels.json');
+let sharedChannels = {};
+try {
+  sharedChannels = require('../data/shared-channels.json');
+} catch (e) {
+  console.error('Missing or invalid shared-channels.json for citieschain feature. Feature disabled.');
+  module.exports = () => {};
+  return;
+}
 let WebhookClient;
 const CITIESCHAIN_WEBHOOKS = sharedChannels.citieschain_webhooks || [];
-const CITIESCHAIN_CHANNELS = sharedChannels.citieschain;
+const CITIESCHAIN_CHANNELS = sharedChannels.citieschain || [];
 if (!WebhookClient) {
   WebhookClient = require('discord.js').WebhookClient;
 }
@@ -62,8 +69,8 @@ if (fs.existsSync(STATE_FILE)) {
     if (parsed && typeof parsed === 'object') {
       gameState = Object.assign(gameState, parsed);
     }
-  } catch {
-    // ignore errors, keep defaults
+  } catch (e) {
+    console.error('Failed to load or parse gameState.json, using defaults:', e);
   }
 }
 

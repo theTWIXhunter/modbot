@@ -15,7 +15,7 @@ module.exports = (client) => {
       return;
     }
   } catch (err) {
-    console.error('Error loading shared-channels.json:', err);
+    console.error('Error loading or parsing shared-channels.json:', err);
     return;
   }
 
@@ -33,16 +33,13 @@ module.exports = (client) => {
     try {
       if (fs.existsSync(dataPath)) {
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-
         // Ensure personal highscores exist
         if (!data.personalHighscores) data.personalHighscores = {};
-
         return data;
       }
     } catch (error) {
-      console.error('Error loading guess number data:', error);
+      console.error('Error loading or parsing guessnumber.json, using defaults:', error);
     }
-
     // Default game data
     return {
       currentNumber: generateRandomNumber(),

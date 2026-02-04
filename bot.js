@@ -93,6 +93,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
+
 // Initialize all features that export an init/setup/function
 for (const feature of features) {
   if (typeof feature === 'function') {

@@ -18,11 +18,13 @@ module.exports = function(client) {
     try {
       if (fs.existsSync(STARBOARD_DATA_FILE)) {
         const data = JSON.parse(fs.readFileSync(STARBOARD_DATA_FILE, 'utf-8'));
-        data.forEach(id => postedMessages.add(id));
+        if (Array.isArray(data)) {
+          data.forEach(id => postedMessages.add(id));
+        }
         console.log(`Loaded ${postedMessages.size} starboard message IDs from disk`);
       }
     } catch (err) {
-      console.error('Error loading starboard data:', err);
+      console.error('Error loading or parsing starboard-messages.json, starting empty:', err);
     }
   }
 

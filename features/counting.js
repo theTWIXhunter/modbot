@@ -3,7 +3,14 @@ const fs = require('fs');
 const path = require('path');
 let WebhookClient;
 
-const sharedChannels = require('../data/shared-channels.json');
+let sharedChannels = {};
+try {
+  sharedChannels = require('../data/shared-channels.json');
+} catch (e) {
+  console.error('Missing or invalid shared-channels.json for counting feature. Feature disabled.');
+  module.exports = () => {};
+  return;
+}
 const COUNTING_WEBHOOKS = sharedChannels.counting_webhooks || [];
 const COUNTING_CHANNELS = sharedChannels.counting || [];
 const dataPath = path.join(__dirname, '../data/counting.json');
@@ -19,7 +26,7 @@ if (fs.existsSync(dataPath)) {
     const file = fs.readFileSync(dataPath, 'utf-8');
     data = JSON.parse(file);
   } catch (err) {
-    console.error('Failed to load counting data:', err);
+    console.error('Failed to load or parse counting.json, using defaults:', err);
   }
 }
 
