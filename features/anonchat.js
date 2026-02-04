@@ -11,6 +11,11 @@ const MOD_LOG_CHANNEL_ID = (process.env.MOD_LOG_CHANNEL_ID || 'YOUR_MOD_LOG_CHAN
 const WEBHOOK_ID = (process.env.ANON_WEBHOOK_ID || 'YOUR_WEBHOOK_ID').replace(/['"]/g, '');
 const WEBHOOK_TOKEN = (process.env.ANON_WEBHOOK_TOKEN || 'YOUR_WEBHOOK_TOKEN').replace(/['"]/g, '');
 const DATA_PATH = path.join(__dirname, '../data/anonchat.json');
+const CENSORED_CHANNELS = (process.env.CENSORED_CHANNELS || '').split(',').map(id => id.trim()).filter(id => id);
+
+// URL regex patterns for media censoring
+const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
+const SPOILER_URL_REGEX = /\|\|(https?:\/\/[^\s]+)\|\|/gi;
 
 // Helper to load or initialize data
 function loadData() {
@@ -115,6 +120,20 @@ module.exports = {
             const text = interaction.options.getString('message');
             let username = interaction.options.getString('username') || 'anonymous user';
             username = username.trim();
+
+            // Check if this channel requires media censoring
+            if (CENSORED_CHANNELS.includes(ANON_CHANNEL_ID)) {
+                // Check for non-spoilered URLs
+                let contentWithoutSpoilers = text.replace(SPOILER_URL_REGEX, '');
+                const hasUnspoileredUrls = URL_REGEX.test(contentWithoutSpoilers);
+                
+                if (hasUnspoileredUrls) {
+                    return interaction.reply({ 
+                        content: '❌ URLs must be spoilered in this channel. Use spoiler tags: `||https://example.com||`', 
+                        ephemeral: true 
+                    });
+                }
+            }
 
             // Prevent username from being taken by another user
             const takenBy = Object.entries(data.usernames).find(([name, uid]) => name.toLowerCase() === username.toLowerCase());
