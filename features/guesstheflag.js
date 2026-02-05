@@ -112,6 +112,7 @@ module.exports = (client) => {
         gameStates[channelId].currentFlag = flag;
         gameStates[channelId].votes = {};
         gameStates[channelId].voters = new Set();
+        gameStates[channelId].isTransitioning = false;
 
         const embed = new EmbedBuilder()
             .setTitle('🚩 Guess the Flag!')
@@ -130,7 +131,8 @@ module.exports = (client) => {
             currentFlag: null,
             votes: {},
             voters: new Set(),
-            scores: savedData[channelId]?.scores || {}
+            scores: savedData[channelId]?.scores || {},
+            isTransitioning: false
         };
     }
 
@@ -147,11 +149,15 @@ module.exports = (client) => {
 
         const gameState = gameStates[message.channel.id];
         if (!gameState || !gameState.currentFlag) return;
+        
+        // Block all guesses during round transition
+        if (gameState.isTransitioning) return;
 
         const content = message.content.trim();
 
         // Skip to next flag
         if (content === '?') {
+            gameState.isTransitioning = true;
             const embed = new EmbedBuilder()
                 .setTitle('⏭️ Flag Skipped')
                 .setDescription(`The correct answer was: **${gameState.currentFlag.name}** ${gameState.currentFlag.emoji}`)
@@ -170,6 +176,9 @@ module.exports = (client) => {
 
             // Check if correct
             if (isCorrectGuess(guess, gameState.currentFlag)) {
+                // Block further guesses during transition
+                gameState.isTransitioning = true;
+                
                 // Winner!
                 const userId = message.author.id;
                 gameState.scores[userId] = (gameState.scores[userId] || 0) + 1;
