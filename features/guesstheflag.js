@@ -165,9 +165,14 @@ module.exports = (client) => {
             voters: new Set(),
             scores: savedData[channelId]?.scores || {}
         };
-        // Start first round
-        startNewRound(channelId);
     }
+
+    // Start first round when bot is ready
+    client.once('ready', () => {
+        for (const channelId of GUESS_FLAG_CHANNELS) {
+            startNewRound(channelId);
+        }
+    });
 
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;
