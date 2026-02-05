@@ -201,16 +201,6 @@ module.exports = (client) => {
             const guess = content.slice(1).trim();
             if (!guess) return;
 
-            // Check if user already voted
-            if (gameState.voters.has(message.author.id)) {
-                const reply = await message.reply('❌ You already voted for this flag!');
-                setTimeout(() => reply.delete().catch(() => {}), 3000);
-                return;
-            }
-
-            // Record vote
-            gameState.voters.add(message.author.id);
-
             // Check if correct
             if (isCorrectGuess(guess, gameState.currentFlag)) {
                 // Winner!
