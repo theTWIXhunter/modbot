@@ -22,7 +22,11 @@ module.exports = (client) => {
         // Check for non-spoilered URLs in message content
         // First remove all spoilered URLs from content
         let contentWithoutSpoilers = message.content.replace(SPOILER_URL_REGEX, '');
-        const hasUnspoileredUrls = URL_REGEX.test(contentWithoutSpoilers);
+        
+        // Extract URLs and filter out Tenor links
+        const urls = contentWithoutSpoilers.match(URL_REGEX) || [];
+        const nonTenorUrls = urls.filter(url => !url.includes('tenor.com'));
+        const hasUnspoileredUrls = nonTenorUrls.length > 0;
 
         // If message contains non-spoilered media/URLs, delete it
         if (hasUnspoileredAttachments || hasUnspoileredUrls) {
