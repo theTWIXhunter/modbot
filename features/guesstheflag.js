@@ -30,59 +30,26 @@ module.exports = (client) => {
         return;
     }
 
-    // List of countries with their flag emoji and flag image URLs
-    const FLAGS = [
-        { name: 'United States', emoji: '🇺🇸', url: 'https://flagcdn.com/w320/us.png', aliases: ['usa', 'america', 'united states of america'] },
-        { name: 'United Kingdom', emoji: '🇬🇧', url: 'https://flagcdn.com/w320/gb.png', aliases: ['uk', 'britain', 'great britain', 'england'] },
-        { name: 'Canada', emoji: '🇨🇦', url: 'https://flagcdn.com/w320/ca.png', aliases: [] },
-        { name: 'France', emoji: '🇫🇷', url: 'https://flagcdn.com/w320/fr.png', aliases: [] },
-        { name: 'Germany', emoji: '🇩🇪', url: 'https://flagcdn.com/w320/de.png', aliases: [] },
-        { name: 'Italy', emoji: '🇮🇹', url: 'https://flagcdn.com/w320/it.png', aliases: [] },
-        { name: 'Spain', emoji: '🇪🇸', url: 'https://flagcdn.com/w320/es.png', aliases: [] },
-        { name: 'Japan', emoji: '🇯🇵', url: 'https://flagcdn.com/w320/jp.png', aliases: [] },
-        { name: 'China', emoji: '🇨🇳', url: 'https://flagcdn.com/w320/cn.png', aliases: [] },
-        { name: 'South Korea', emoji: '🇰🇷', url: 'https://flagcdn.com/w320/kr.png', aliases: ['korea'] },
-        { name: 'Brazil', emoji: '🇧🇷', url: 'https://flagcdn.com/w320/br.png', aliases: [] },
-        { name: 'Mexico', emoji: '🇲🇽', url: 'https://flagcdn.com/w320/mx.png', aliases: [] },
-        { name: 'Australia', emoji: '🇦🇺', url: 'https://flagcdn.com/w320/au.png', aliases: [] },
-        { name: 'India', emoji: '🇮🇳', url: 'https://flagcdn.com/w320/in.png', aliases: [] },
-        { name: 'Russia', emoji: '🇷🇺', url: 'https://flagcdn.com/w320/ru.png', aliases: [] },
-        { name: 'Netherlands', emoji: '🇳🇱', url: 'https://flagcdn.com/w320/nl.png', aliases: ['holland'] },
-        { name: 'Belgium', emoji: '🇧🇪', url: 'https://flagcdn.com/w320/be.png', aliases: [] },
-        { name: 'Switzerland', emoji: '🇨🇭', url: 'https://flagcdn.com/w320/ch.png', aliases: [] },
-        { name: 'Sweden', emoji: '🇸🇪', url: 'https://flagcdn.com/w320/se.png', aliases: [] },
-        { name: 'Norway', emoji: '🇳🇴', url: 'https://flagcdn.com/w320/no.png', aliases: [] },
-        { name: 'Denmark', emoji: '🇩🇰', url: 'https://flagcdn.com/w320/dk.png', aliases: [] },
-        { name: 'Finland', emoji: '🇫🇮', url: 'https://flagcdn.com/w320/fi.png', aliases: [] },
-        { name: 'Poland', emoji: '🇵🇱', url: 'https://flagcdn.com/w320/pl.png', aliases: [] },
-        { name: 'Greece', emoji: '🇬🇷', url: 'https://flagcdn.com/w320/gr.png', aliases: [] },
-        { name: 'Turkey', emoji: '🇹🇷', url: 'https://flagcdn.com/w320/tr.png', aliases: ['türkiye'] },
-        { name: 'Portugal', emoji: '🇵🇹', url: 'https://flagcdn.com/w320/pt.png', aliases: [] },
-        { name: 'Argentina', emoji: '🇦🇷', url: 'https://flagcdn.com/w320/ar.png', aliases: [] },
-        { name: 'South Africa', emoji: '🇿🇦', url: 'https://flagcdn.com/w320/za.png', aliases: [] },
-        { name: 'Egypt', emoji: '🇪🇬', url: 'https://flagcdn.com/w320/eg.png', aliases: [] },
-        { name: 'Thailand', emoji: '🇹🇭', url: 'https://flagcdn.com/w320/th.png', aliases: [] },
-        { name: 'Vietnam', emoji: '🇻🇳', url: 'https://flagcdn.com/w320/vn.png', aliases: [] },
-        { name: 'Philippines', emoji: '🇵🇭', url: 'https://flagcdn.com/w320/ph.png', aliases: [] },
-        { name: 'Indonesia', emoji: '🇮🇩', url: 'https://flagcdn.com/w320/id.png', aliases: [] },
-        { name: 'Malaysia', emoji: '🇲🇾', url: 'https://flagcdn.com/w320/my.png', aliases: [] },
-        { name: 'Singapore', emoji: '🇸🇬', url: 'https://flagcdn.com/w320/sg.png', aliases: [] },
-        { name: 'New Zealand', emoji: '🇳🇿', url: 'https://flagcdn.com/w320/nz.png', aliases: [] },
-        { name: 'Ireland', emoji: '🇮🇪', url: 'https://flagcdn.com/w320/ie.png', aliases: [] },
-        { name: 'Austria', emoji: '🇦🇹', url: 'https://flagcdn.com/w320/at.png', aliases: [] },
-        { name: 'Czech Republic', emoji: '🇨🇿', url: 'https://flagcdn.com/w320/cz.png', aliases: ['czechia'] },
-        { name: 'Hungary', emoji: '🇭🇺', url: 'https://flagcdn.com/w320/hu.png', aliases: [] },
-        { name: 'Romania', emoji: '🇷🇴', url: 'https://flagcdn.com/w320/ro.png', aliases: [] },
-        { name: 'Ukraine', emoji: '🇺🇦', url: 'https://flagcdn.com/w320/ua.png', aliases: [] },
-        { name: 'Chile', emoji: '🇨🇱', url: 'https://flagcdn.com/w320/cl.png', aliases: [] },
-        { name: 'Colombia', emoji: '🇨🇴', url: 'https://flagcdn.com/w320/co.png', aliases: [] },
-        { name: 'Peru', emoji: '🇵🇪', url: 'https://flagcdn.com/w320/pe.png', aliases: [] },
-        { name: 'Venezuela', emoji: '🇻🇪', url: 'https://flagcdn.com/w320/ve.png', aliases: [] },
-        { name: 'Saudi Arabia', emoji: '🇸🇦', url: 'https://flagcdn.com/w320/sa.png', aliases: [] },
-        { name: 'United Arab Emirates', emoji: '🇦🇪', url: 'https://flagcdn.com/w320/ae.png', aliases: ['uae', 'emirates'] },
-        { name: 'Israel', emoji: '🇮🇱', url: 'https://flagcdn.com/w320/il.png', aliases: [] },
-        { name: 'Pakistan', emoji: '🇵🇰', url: 'https://flagcdn.com/w320/pk.png', aliases: [] },
-    ];
+    // Load flags from data file
+    const flagsPath = path.join(__dirname, '..', 'data', 'flags.json');
+    let FLAGS = [];
+
+    try {
+        if (fs.existsSync(flagsPath)) {
+            const flagsData = JSON.parse(fs.readFileSync(flagsPath, 'utf8'));
+            // Add the URL property based on the code
+            FLAGS = flagsData.map(flag => ({
+                ...flag,
+                url: `https://flagcdn.com/w320/${flag.code}.png`
+            }));
+        } else {
+            console.error('flags.json not found! Guess the Flag feature disabled.');
+            return;
+        }
+    } catch (err) {
+        console.error('Error loading or parsing flags.json:', err);
+        return;
+    }
 
     const dataPath = path.join(__dirname, '..', 'data', 'guesstheflag.json');
 
