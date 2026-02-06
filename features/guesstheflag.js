@@ -30,21 +30,34 @@ module.exports = (client) => {
         return;
     }
 
-    // Load flags from data file
+    // Load flags from data files
     const flagsPath = path.join(__dirname, '..', 'data', 'flags.json');
+    const customFlagsPath = path.join(__dirname, '..', 'data', 'custom-flags.json');
     let FLAGS = [];
 
     try {
+        // Load standard flags
         if (fs.existsSync(flagsPath)) {
             const flagsData = JSON.parse(fs.readFileSync(flagsPath, 'utf8'));
             // Add the URL property based on the code
             FLAGS = flagsData.map(flag => ({
                 ...flag,
-                url: `https://flagcdn.com/w320/${flag.code}.png`
+                url: flag.url || `https://flagcdn.com/w320/${flag.code}.png`
             }));
         } else {
             console.error('flags.json not found! Guess the Flag feature disabled.');
             return;
+        }
+
+        // Load custom flags if they exist
+        if (fs.existsSync(customFlagsPath)) {
+            const customFlagsData = JSON.parse(fs.readFileSync(customFlagsPath, 'utf8'));
+            const customFlags = customFlagsData.map(flag => ({
+                ...flag,
+                url: flag.url || `https://flagcdn.com/w320/${flag.code}.png`
+            }));
+            FLAGS = FLAGS.concat(customFlags);
+            console.log(`[Guess the Flag] Loaded ${customFlags.length} custom flag(s).`);
         }
     } catch (err) {
         console.error('Error loading or parsing flags.json:', err);

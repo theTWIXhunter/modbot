@@ -1,0 +1,9 @@
+[
+    {
+        "name": "Example Custom Flag",
+        "emoji": "🏴",
+        "code": "example",
+        "url": "https://example.com/flag.png",
+        "aliases": ["example", "custom"]
+    }
+]
