@@ -213,7 +213,7 @@ module.exports = (client) => {
                 return;
             }
 
-            // ?flag set name - set current flag
+            // ?flag set name - set current flag (without revealing it)
             if (subcommand === 'set') {
                 const flagName = args.slice(1).join(' ');
                 if (!flagName) {
@@ -232,14 +232,9 @@ module.exports = (client) => {
                 gameState.voters = new Set();
                 gameState.isTransitioning = false;
 
-                const embed = new EmbedBuilder()
-                    .setTitle('🚩 Guess the Flag!')
-                    .setDescription('What country does this flag belong to?\n\n**How to play:**\n• Type `!` followed by the country name (e.g., `!France`)\n• Type `?` to skip to the next flag')
-                    .setImage(flag.url)
-                    .setColor('#5865F2')
-                    .setFooter({ text: `Set by ${message.author.tag}` });
-
-                await message.channel.send({ embeds: [embed] });
+                await message.reply(`✅ Answer set to: **${flag.name}** ${flag.emoji}`).then(msg => {
+                    setTimeout(() => msg.delete().catch(() => {}), 5000);
+                });
                 await message.delete().catch(() => {});
                 return;
             }
