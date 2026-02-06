@@ -117,6 +117,29 @@ module.exports = (client) => {
         return false;
     }
 
+    function findFlagByName(name) {
+        const normalized = normalizeCountryName(name);
+        
+        for (const flag of FLAGS) {
+            if (normalizeCountryName(flag.name) === normalized) {
+                return flag;
+            }
+            
+            // Check aliases
+            for (const alias of flag.aliases) {
+                if (normalizeCountryName(alias) === normalized) {
+                    return flag;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    function isAdmin(member) {
+        return member.permissions.has('Administrator') || member.permissions.has('ManageGuild');
+    }
+
     async function startNewRound(channelId) {
         const channel = await client.channels.fetch(channelId);
         if (!channel) return;
@@ -167,6 +190,104 @@ module.exports = (client) => {
         if (gameState.isTransitioning) return;
 
         const content = message.content.trim();
+
+        // ?flag commands
+        if (content.startsWith('?flag ')) {
+            if (!isAdmin(message.member)) {
+                await message.reply('❌ This command is admin only.');
+                return;
+            }
+
+            const args = content.slice(6).trim().split(' ');
+            const subcommand = args[0].toLowerCase();
+
+            // ?flag get - show current flag
+            if (subcommand === 'get') {
+                const embed = new EmbedBuilder()
+                    .setTitle('🚩 Current Flag')
+                    .setDescription(`**${gameState.currentFlag.name}** ${gameState.currentFlag.emoji}`)
+                    .setImage(gameState.currentFlag.url)
+                    .setColor('#5865F2');
+
+                await message.reply({ embeds: [embed] });
+                return;
+            }
+
+            // ?flag set name - set current flag
+            if (subcommand === 'set') {
+                const flagName = args.slice(1).join(' ');
+                if (!flagName) {
+                    await message.reply('Please provide a country name. Example: `?flag set France`');
+                    return;
+                }
+
+                const flag = findFlagByName(flagName);
+                if (!flag) {
+                    await message.reply(`Country "${flagName}" not found. Please try again.`);
+                    return;
+                }
+
+                gameState.currentFlag = flag;
+                gameState.votes = {};
+                gameState.voters = new Set();
+                gameState.isTransitioning = false;
+
+                const embed = new EmbedBuilder()
+                    .setTitle('🚩 Guess the Flag!')
+                    .setDescription('What country does this flag belong to?\n\n**How to play:**\n• Type `!` followed by the country name (e.g., `!France`)\n• Type `?` to skip to the next flag')
+                    .setImage(flag.url)
+                    .setColor('#5865F2')
+                    .setFooter({ text: `Set by ${message.author.tag}` });
+
+                await message.channel.send({ embeds: [embed] });
+                await message.delete().catch(() => {});
+                return;
+            }
+
+            // ?flag send name - skip and send specific flag
+            if (subcommand === 'send') {
+                const flagName = args.slice(1).join(' ');
+                if (!flagName) {
+                    await message.reply('Please provide a country name. Example: `?flag send France`');
+                    return;
+                }
+
+                const flag = findFlagByName(flagName);
+                if (!flag) {
+                    await message.reply(`Country "${flagName}" not found. Please try again.`);
+                    return;
+                }
+
+                gameState.isTransitioning = true;
+
+                const revealEmbed = new EmbedBuilder()
+                    .setTitle('⏭️ Flag Skipped')
+                    .setDescription(`The correct answer was: **${gameState.currentFlag.name}** ${gameState.currentFlag.emoji}`)
+                    .setColor('#FEE75C')
+                    .setFooter({ text: `Skipped by ${message.author.tag}` });
+
+                await message.channel.send({ embeds: [revealEmbed] });
+                await message.delete().catch(() => {});
+
+                // Set the new flag
+                gameState.currentFlag = flag;
+                gameState.votes = {};
+                gameState.voters = new Set();
+                gameState.isTransitioning = false;
+
+                const embed = new EmbedBuilder()
+                    .setTitle('🚩 Guess the Flag!')
+                    .setDescription('What country does this flag belong to?\n\n**How to play:**\n• Type `!` followed by the country name (e.g., `!France`)\n• Type `?` to skip to the next flag')
+                    .setImage(flag.url)
+                    .setColor('#5865F2')
+                    .setFooter({ text: 'First to guess correctly wins!' });
+
+                await message.channel.send({ embeds: [embed] });
+                return;
+            }
+
+            return;
+        }
 
         // Skip to next flag
         if (content === '?') {
