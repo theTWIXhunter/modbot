@@ -1,0 +1,56 @@
+{
+  "France": [
+    {"name": "Eiffel Tower", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg/800px-Tour_Eiffel_Wikimedia_Commons.jpg"},
+    {"name": "Louvre Museum", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Louvre_Museum_Wikimedia_Commons.jpg/800px-Louvre_Museum_Wikimedia_Commons.jpg"},
+    {"name": "Arc de Triomphe", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Arc_de_Triomphe%2C_Paris_21_October_2010.jpg/800px-Arc_de_Triomphe%2C_Paris_21_October_2010.jpg"}
+  ],
+  "United States": [
+    {"name": "Statue of Liberty", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Statue_of_Liberty_7.jpg/800px-Statue_of_Liberty_7.jpg"},
+    {"name": "Golden Gate Bridge", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/GoldenGateBridge-001.jpg/800px-GoldenGateBridge-001.jpg"}
+  ],
+  "United Kingdom": [
+    {"name": "Big Ben", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg/800px-Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg"},
+    {"name": "Tower Bridge", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Tower_Bridge_from_Shad_Thames.jpg/800px-Tower_Bridge_from_Shad_Thames.jpg"}
+  ],
+  "Italy": [
+    {"name": "Colosseum", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/800px-Colosseo_2020.jpg"},
+    {"name": "Leaning Tower of Pisa", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg/800px-The_Leaning_Tower_of_Pisa_SB.jpeg"}
+  ],
+  "Egypt": [
+    {"name": "Pyramids of Giza", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/All_Gizah_Pyramids.jpg/800px-All_Gizah_Pyramids.jpg"},
+    {"name": "Sphinx", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Great_Sphinx_of_Giza_-_20080716a.jpg/800px-Great_Sphinx_of_Giza_-_20080716a.jpg"}
+  ],
+  "India": [
+    {"name": "Taj Mahal", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Taj_Mahal_%28Edited%29.jpeg/800px-Taj_Mahal_%28Edited%29.jpeg"}
+  ],
+  "China": [
+    {"name": "Great Wall of China", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/The_Great_Wall_of_China_at_Jinshanling-edit.jpg/800px-The_Great_Wall_of_China_at_Jinshanling-edit.jpg"}
+  ],
+  "Australia": [
+    {"name": "Sydney Opera House", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Sydney_Australia._%2821339175489%29.jpg/800px-Sydney_Australia._%2821339175489%29.jpg"}
+  ],
+  "Brazil": [
+    {"name": "Christ the Redeemer", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Cristo_Redentor_-_Rio_de_Janeiro%2C_Brasil.jpg/800px-Cristo_Redentor_-_Rio_de_Janeiro%2C_Brasil.jpg"}
+  ],
+  "Greece": [
+    {"name": "Parthenon", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/The_Parthenon_in_Athens.jpg/800px-The_Parthenon_in_Athens.jpg"}
+  ],
+  "Spain": [
+    {"name": "Sagrada Familia", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Sagrada_Familia_8-12-21_%281%29.jpg/800px-Sagrada_Familia_8-12-21_%281%29.jpg"}
+  ],
+  "Russia": [
+    {"name": "Saint Basil's Cathedral", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Saint_Basil%27s_Cathedral_and_the_Red_Square.jpg/800px-Saint_Basil%27s_Cathedral_and_the_Red_Square.jpg"}
+  ],
+  "Japan": [
+    {"name": "Mount Fuji", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/080103_hakkai_fuji.jpg/800px-080103_hakkai_fuji.jpg"}
+  ],
+  "Germany": [
+    {"name": "Brandenburg Gate", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Brandenburger_Tor_abends.jpg/800px-Brandenburger_Tor_abends.jpg"}
+  ],
+  "Netherlands": [
+    {"name": "Amsterdam Canals", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Delft_-_Oude_Delft.jpg/800px-Delft_-_Oude_Delft.jpg"}
+  ],
+  "Belgium": [
+    {"name": "Atomium", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Atomium_Brussels_17-08-2010_15-10-57.jpg/800px-Atomium_Brussels_17-08-2010_15-10-57.jpg"}
+  ]
+}
