@@ -278,6 +278,7 @@ module.exports = (client) => {
 
         // Select question type
         const questionType = selectRandomQuestionType();
+        console.log(`[Guess the Country] Selected question type: ${questionType}`);
         
         // Get appropriate country based on question type
         let country = null;
@@ -320,6 +321,8 @@ module.exports = (client) => {
         gameState.voters = new Set();
         gameState.isTransitioning = false;
         gameState.roundStartTime = Date.now();
+
+        console.log(`[Guess the Country] New round started in ${channel.name} - Type: ${gameState.currentQuestion.type}, Answer: ${gameState.currentQuestion.correctAnswer} ${gameState.currentQuestion.emoji}`);
 
         const embed = new EmbedBuilder()
             .setTitle(gameState.currentQuestion.title)
@@ -382,6 +385,7 @@ module.exports = (client) => {
 
             // ?country get - show current answer
             if (subcommand === 'get') {
+                console.log(`[Guess the Country] ${message.author.tag} used ?country get command - Answer: ${gameState.currentQuestion.correctAnswer}`);
                 const embed = new EmbedBuilder()
                     .setTitle('🔍 Current Answer')
                     .setDescription(`**${gameState.currentQuestion.correctAnswer}** ${gameState.currentQuestion.emoji}`)
@@ -393,6 +397,7 @@ module.exports = (client) => {
 
             // ?country types - list active question types
             if (subcommand === 'types') {
+                console.log(`[Guess the Country] ${message.author.tag} used ?country types command`);
                 const types = [
                     '🚩 Flag → Country',
                     '🏛️ Country → Capital',
@@ -445,6 +450,7 @@ module.exports = (client) => {
             // Update skip cooldown
             skipCooldowns[message.channel.id][userId] = now;
 
+            console.log(`[Guess the Country] ${message.author.tag} skipped - Answer was: ${gameState.currentQuestion.correctAnswer} (Score: ${gameState.scores[userId]})`);
             gameState.isTransitioning = true;
             const embed = new EmbedBuilder()
                 .setTitle('⏭️ Question Skipped')
@@ -475,6 +481,7 @@ module.exports = (client) => {
                 gameState.scores[userId] = (gameState.scores[userId] || 0) + 1;
                 saveGameData();
 
+                console.log(`[Guess the Country] ✅ ${message.author.tag} guessed correctly: ${gameState.currentQuestion.correctAnswer} (Score: ${gameState.scores[userId]})`);
                 const embed = new EmbedBuilder()
                     .setTitle('🎉 Correct!')
                     .setDescription(
@@ -491,6 +498,7 @@ module.exports = (client) => {
                 setTimeout(() => startNewRound(message.channel.id), 3000);
             } else {
                 // Wrong guess
+                console.log(`[Guess the Country] ❌ ${message.author.tag} guessed wrong: "${guess}" (Answer: ${gameState.currentQuestion.correctAnswer})`);
                 await message.react('❌');
             }
         }
