@@ -196,7 +196,7 @@ module.exports = (client) => {
         // ?flag commands
         if (content.startsWith('?flag ')) {
             if (!isAdmin(message.member)) {
-                await message.reply('❌ This command is admin only.');
+                await message.reply('❌ This command is admin only.').catch(() => {});
                 return;
             }
 
@@ -212,7 +212,7 @@ module.exports = (client) => {
                     .setImage(gameState.currentFlag.url)
                     .setColor('#5865F2');
 
-                await message.reply({ embeds: [embed] });
+                await message.reply({ embeds: [embed] }).catch(() => {});
                 return;
             }
 
@@ -220,13 +220,13 @@ module.exports = (client) => {
             if (subcommand === 'set') {
                 const flagName = args.slice(1).join(' ');
                 if (!flagName) {
-                    await message.reply('Please provide a country name. Example: `?flag set France`');
+                    await message.reply('Please provide a country name. Example: `?flag set France`').catch(() => {});
                     return;
                 }
 
                 const flag = findFlagByName(flagName);
                 if (!flag) {
-                    await message.reply(`Country "${flagName}" not found. Please try again.`);
+                    await message.reply(`Country "${flagName}" not found. Please try again.`).catch(() => {});
                     return;
                 }
 
@@ -238,7 +238,7 @@ module.exports = (client) => {
                 console.log(`[Guess the Flag] ${message.author.tag} used ?flag set command - Answer set to: ${flag.name}`);
                 await message.reply(`✅ Answer set to: **${flag.name}** ${flag.emoji}`).then(msg => {
                     setTimeout(() => msg.delete().catch(() => {}), 5000);
-                });
+                }).catch(() => {});
                 await message.delete().catch(() => {});
                 return;
             }
@@ -247,13 +247,13 @@ module.exports = (client) => {
             if (subcommand === 'send') {
                 const flagName = args.slice(1).join(' ');
                 if (!flagName) {
-                    await message.reply('Please provide a country name. Example: `?flag send France`');
+                    await message.reply('Please provide a country name. Example: `?flag send France`').catch(() => {});
                     return;
                 }
 
                 const flag = findFlagByName(flagName);
                 if (!flag) {
-                    await message.reply(`Country "${flagName}" not found. Please try again.`);
+                    await message.reply(`Country "${flagName}" not found. Please try again.`).catch(() => {});
                     return;
                 }
 

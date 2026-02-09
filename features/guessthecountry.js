@@ -376,7 +376,7 @@ module.exports = (client) => {
         // ?country commands (admin only)
         if (content.startsWith('?country ')) {
             if (!isAdmin(message.member)) {
-                await message.reply('❌ This command is admin only.');
+                await message.reply('❌ This command is admin only.').catch(() => {});
                 return;
             }
 
@@ -391,7 +391,7 @@ module.exports = (client) => {
                     .setDescription(`**${gameState.currentQuestion.correctAnswer}** ${gameState.currentQuestion.emoji}`)
                     .setColor('#5865F2');
 
-                await message.reply({ embeds: [embed] });
+                await message.reply({ embeds: [embed] }).catch(() => {});
                 return;
             }
 
@@ -412,7 +412,7 @@ module.exports = (client) => {
                     .setDescription(types.join('\n'))
                     .setColor('#5865F2');
 
-                await message.reply({ embeds: [embed] });
+                await message.reply({ embeds: [embed] }).catch(() => {});
                 return;
             }
 
@@ -429,7 +429,7 @@ module.exports = (client) => {
             // Check if round has been active for at least 1 minute
             if (timeSinceRoundStart < SKIP_COOLDOWN) {
                 const remainingTime = Math.ceil((SKIP_COOLDOWN - timeSinceRoundStart) / 1000);
-                await message.reply(`⏳ You must wait ${remainingTime} more seconds before skipping.`);
+                await message.channel.send(`⏳ You must wait ${remainingTime} more seconds before skipping.`).catch(() => {});
                 return;
             }
 
@@ -439,7 +439,7 @@ module.exports = (client) => {
 
             if (timeSinceLastSkip < SKIP_COOLDOWN) {
                 const remainingTime = Math.ceil((SKIP_COOLDOWN - timeSinceLastSkip) / 1000);
-                await message.reply(`⏳ You can skip again in ${remainingTime} seconds.`);
+                await message.channel.send(`⏳ You can skip again in ${remainingTime} seconds.`).catch(() => {});
                 return;
             }
 
