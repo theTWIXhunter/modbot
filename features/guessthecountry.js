@@ -71,7 +71,7 @@ module.exports = (client) => {
                     emoji: flag.emoji,
                     code: flag.code,
                     aliases: flag.aliases,
-                    flagUrl: flag.url || `https://flagcdn.com/w320/${flag.code}.png`,
+                    flagUrl: flag.url || `https://flagsapi.com/${flag.code.toUpperCase()}/flat/256.png`,
                     capital: null,
                     capitalAliases: [],
                     borders: [],
@@ -355,7 +355,7 @@ module.exports = (client) => {
     }
 
     // Start first round when bot is ready
-    client.once('ready', () => {
+    client.once('clientReady', () => {
         for (const channelId of GUESS_COUNTRY_CHANNELS) {
             startNewRound(channelId);
         }

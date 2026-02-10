@@ -1,0 +1,2 @@
+# This directory will contain downloaded landmark images
+# Run: python scripts/download_landmarks.py
