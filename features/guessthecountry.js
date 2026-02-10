@@ -71,7 +71,7 @@ module.exports = (client) => {
                     emoji: flag.emoji,
                     code: flag.code,
                     aliases: flag.aliases,
-                    flagUrl: flag.url || `https://flagsapi.com/${flag.code.toUpperCase()}/flat/256.png`,
+                    flagUrl: flag.url || `https://flagcdn.com/w320/${flag.code}.png`,
                     capital: null,
                     capitalAliases: [],
                     borders: [],
