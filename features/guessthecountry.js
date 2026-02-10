@@ -5,7 +5,8 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const sharp = require('sharp');
+const { EmbedBuilder, SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 
 module.exports = (client) => {
     // Load shared channel configuration
@@ -45,9 +46,9 @@ module.exports = (client) => {
     // Weighted distribution (adds up to 100)
     const DEFAULT_WEIGHTS = {
         [QUESTION_TYPES.FLAG_TO_COUNTRY]: 25,
-        [QUESTION_TYPES.COUNTRY_TO_CAPITAL]: 0, // Disabled per user request
-        [QUESTION_TYPES.CAPITAL_TO_COUNTRY]: 0, // Disabled per user request
-        [QUESTION_TYPES.OUTLINE_TO_COUNTRY]: 25, // Using amCharts SVG maps
+        [QUESTION_TYPES.COUNTRY_TO_CAPITAL]: 0, // Disabled
+        [QUESTION_TYPES.CAPITAL_TO_COUNTRY]: 0, // Disabled
+        [QUESTION_TYPES.OUTLINE_TO_COUNTRY]: 25, // Enabled with SVG to PNG conversion
         [QUESTION_TYPES.BORDERS_TO_COUNTRY]: 25,
         [QUESTION_TYPES.LANDMARK_TO_COUNTRY]: 25
     };
@@ -216,6 +217,57 @@ module.exports = (client) => {
         });
     }
 
+    // Download SVG, convert to PNG, and cache on disk
+    async function convertAndCacheSvg(svgUrl, countryCode) {
+        const cacheDir = path.join(__dirname, '..', 'data', 'images', 'png_maps');
+        const pngPath = path.join(cacheDir, `${countryCode}.png`);
+
+        // Check if already cached
+        if (fs.existsSync(pngPath)) {
+            console.log(`[Guess the Country] Using cached PNG for ${countryCode}`);
+            return pngPath;
+        }
+
+        // Create cache directory if it doesn't exist
+        if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true });
+        }
+
+        console.log(`[Guess the Country] Converting ${countryCode} SVG to PNG: ${svgUrl}`);
+
+        return new Promise((resolve, reject) => {
+            https.get(svgUrl, (res) => {
+                if (res.statusCode !== 200) {
+                    console.error(`[Guess the Country] Failed to download SVG for ${countryCode}: ${res.statusCode}`);
+                    return reject(new Error(`HTTP ${res.statusCode}`));
+                }
+
+                const chunks = [];
+                res.on('data', (chunk) => chunks.push(chunk));
+                res.on('end', async () => {
+                    try {
+                        const svgBuffer = Buffer.concat(chunks);
+                        
+                        // Convert SVG to PNG using sharp
+                        await sharp(svgBuffer)
+                            .resize(800, null, { fit: 'inside' }) // Resize to max width 800px
+                            .png()
+                            .toFile(pngPath);
+                        
+                        console.log(`[Guess the Country] Successfully converted and cached ${countryCode}`);
+                        resolve(pngPath);
+                    } catch (err) {
+                        console.error(`[Guess the Country] Error converting SVG for ${countryCode}:`, err);
+                        reject(err);
+                    }
+                });
+            }).on('error', (err) => {
+                console.error(`[Guess the Country] Error downloading SVG for ${countryCode}:`, err);
+                reject(err);
+            });
+        });
+    }
+
     function selectRandomQuestionType(weights = DEFAULT_WEIGHTS) {
         // Filter out question types that can't be used due to missing data
         const availableTypes = {};
@@ -260,7 +312,7 @@ module.exports = (client) => {
         return QUESTION_TYPES.FLAG_TO_COUNTRY;
     }
 
-    function generateQuestion(type, country) {
+    async function generateQuestion(type, country) {
         const question = {
             type: type,
             country: country.name,
@@ -292,10 +344,20 @@ module.exports = (client) => {
                 break;
 
             case QUESTION_TYPES.OUTLINE_TO_COUNTRY:
-                question.title = '🗺️ Guess the Country!';
-                question.description = 'What country has this outline/shape?';
-                question.imageUrl = country.outlineUrl;
-                question.answer = country.name;
+                try {
+                    // Convert SVG to PNG and cache it
+                    const pngPath = await convertAndCacheSvg(country.outlineUrl, country.code);
+                    question.title = '🗺️ Guess the Country!';
+                    question.description = 'What country has this outline/shape?';
+                    question.imageUrl = `attachment://${country.code}.png`;
+                    question.filePath = pngPath; // Store file path for attachment
+                    question.fileAttachmentName = `${country.code}.png`; // Store attachment name
+                    question.answer = country.name;
+                    console.log(`[Guess the Country] Generated outline question for ${country.name}`);
+                } catch (err) {
+                    console.error(`[Guess the Country] Failed to generate outline for ${country.name}:`, err);
+                    return null; // Return null if conversion fails
+                }
                 break;
 
             case QUESTION_TYPES.BORDERS_TO_COUNTRY:
@@ -355,12 +417,8 @@ module.exports = (client) => {
             if (questionType === QUESTION_TYPES.COUNTRY_TO_CAPITAL || questionType === QUESTION_TYPES.CAPITAL_TO_COUNTRY) {
                 valid = candidate.capital !== null && candidate.capital !== '';
             } else if (questionType === QUESTION_TYPES.OUTLINE_TO_COUNTRY) {
-                // Check if outline URL exists (not 404)
-                if (candidate.outlineUrl) {
-                    valid = await checkUrlExists(candidate.outlineUrl);
-                } else {
-                    valid = false;
-                }
+                // Just check if outline URL is configured
+                valid = candidate.outlineUrl !== null;
             } else if (questionType === QUESTION_TYPES.BORDERS_TO_COUNTRY) {
                 // Check that country has borders AND that at least one neighbor exists in our database
                 if (candidate.borders && candidate.borders.length > 0) {
@@ -384,13 +442,13 @@ module.exports = (client) => {
         if (!country) {
             // Fallback to flag question with any country
             country = getRandomCountry();
-            const question = generateQuestion(QUESTION_TYPES.FLAG_TO_COUNTRY, country);
+            const question = await generateQuestion(QUESTION_TYPES.FLAG_TO_COUNTRY, country);
             gameState.currentQuestion = question;
         } else {
-            const question = generateQuestion(questionType, country);
-            // If question generation failed (e.g., no valid borders found), fall back to flag question
+            const question = await generateQuestion(questionType, country);
+            // If question generation failed (e.g., SVG conversion failed), fall back to flag question
             if (!question || !question.title) {
-                const fallbackQuestion = generateQuestion(QUESTION_TYPES.FLAG_TO_COUNTRY, country);
+                const fallbackQuestion = await generateQuestion(QUESTION_TYPES.FLAG_TO_COUNTRY, country);
                 gameState.currentQuestion = fallbackQuestion;
             } else {
                 gameState.currentQuestion = question;
@@ -417,7 +475,16 @@ module.exports = (client) => {
             embed.setImage(gameState.currentQuestion.imageUrl);
         }
 
-        await channel.send({ embeds: [embed] });
+        // Send with attachment if it's an outline question with a file
+        const messageOptions = { embeds: [embed] };
+        if (gameState.currentQuestion.filePath && gameState.currentQuestion.fileAttachmentName) {
+            const attachment = new AttachmentBuilder(gameState.currentQuestion.filePath, { 
+                name: gameState.currentQuestion.fileAttachmentName 
+            });
+            messageOptions.files = [attachment];
+        }
+
+        await channel.send(messageOptions);
     }
 
     // Initialize game states for configured channels
