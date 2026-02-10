@@ -247,7 +247,6 @@ module.exports = (client) => {
                 });
                 question.title = '🧭 Guess the Country!';
                 question.description = `What country borders: **${borderNames.join(', ')}**?`;
-                question.imageUrl = country.flagUrl;
                 question.answer = country.name;
                 break;
 
