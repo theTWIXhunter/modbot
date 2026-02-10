@@ -240,11 +240,14 @@ module.exports = (client) => {
                 break;
 
             case QUESTION_TYPES.BORDERS_TO_COUNTRY:
-                // Get neighboring country names
-                const borderNames = country.borders.map(code => {
-                    const neighbor = COUNTRIES.find(c => c.code.toUpperCase() === code.toUpperCase());
-                    return neighbor ? neighbor.name : code;
-                });
+                // Get neighboring country names (filter out countries not in our database)
+                const borderNames = country.borders
+                    .map(code => {
+                        const neighbor = COUNTRIES.find(c => c.code.toUpperCase() === code.toUpperCase());
+                        return neighbor ? neighbor.name : null;
+                    })
+                    .filter(name => name !== null);
+                
                 question.title = '🧭 Guess the Country!';
                 question.description = `What country borders: **${borderNames.join(', ')}**?`;
                 question.answer = country.name;
@@ -295,7 +298,15 @@ module.exports = (client) => {
             } else if (questionType === QUESTION_TYPES.OUTLINE_TO_COUNTRY) {
                 valid = candidate.outlineUrl !== null;
             } else if (questionType === QUESTION_TYPES.BORDERS_TO_COUNTRY) {
-                valid = candidate.borders && candidate.borders.length > 0;
+                // Check that country has borders AND that at least one neighbor exists in our database
+                if (candidate.borders && candidate.borders.length > 0) {
+                    const validNeighbors = candidate.borders.filter(code => 
+                        COUNTRIES.some(c => c.code.toUpperCase() === code.toUpperCase())
+                    );
+                    valid = validNeighbors.length > 0;
+                } else {
+                    valid = false;
+                }
             } else if (questionType === QUESTION_TYPES.LANDMARK_TO_COUNTRY) {
                 valid = LANDMARKS[candidate.name] && LANDMARKS[candidate.name].length > 0;
             }
@@ -313,7 +324,13 @@ module.exports = (client) => {
             gameState.currentQuestion = question;
         } else {
             const question = generateQuestion(questionType, country);
-            gameState.currentQuestion = question;
+            // If question generation failed (e.g., no valid borders found), fall back to flag question
+            if (!question || !question.title) {
+                const fallbackQuestion = generateQuestion(QUESTION_TYPES.FLAG_TO_COUNTRY, country);
+                gameState.currentQuestion = fallbackQuestion;
+            } else {
+                gameState.currentQuestion = question;
+            }
         }
 
         gameState.votes = {};
