@@ -74,7 +74,7 @@ module.exports = (client) => {
                     flagUrl: flag.url || `https://flagcdn.com/w320/${flag.code}.png`,
                     capital: null,
                     capitalAliases: [],
-                    borders: [],
+                    borders: flag.borders || [],
                     outlineUrl: null,
                     landmarks: []
                 }));
@@ -242,7 +242,7 @@ module.exports = (client) => {
             case QUESTION_TYPES.BORDERS_TO_COUNTRY:
                 // Get neighboring country names
                 const borderNames = country.borders.map(code => {
-                    const neighbor = COUNTRIES.find(c => c.code.toUpperCase() === code);
+                    const neighbor = COUNTRIES.find(c => c.code.toUpperCase() === code.toUpperCase());
                     return neighbor ? neighbor.name : code;
                 });
                 question.title = '🧭 Guess the Country!';
