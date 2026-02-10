@@ -249,8 +249,12 @@ module.exports = (client) => {
                         const svgBuffer = Buffer.concat(chunks);
                         
                         // Convert SVG to PNG using sharp
-                        await sharp(svgBuffer)
-                            .resize(800, null, { fit: 'inside' }) // Resize to max width 800px
+                        // Use higher density for better quality and ensure full SVG is rendered
+                        await sharp(svgBuffer, { density: 300 })
+                            .resize(800, 800, { 
+                                fit: 'contain',
+                                background: { r: 255, g: 255, b: 255, alpha: 0 }
+                            })
                             .png()
                             .toFile(pngPath);
                         
