@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 
 module.exports = (client) => {
@@ -44,16 +45,53 @@ module.exports = (client) => {
     // Weighted distribution (adds up to 100)
     const DEFAULT_WEIGHTS = {
         [QUESTION_TYPES.FLAG_TO_COUNTRY]: 25,
-        [QUESTION_TYPES.COUNTRY_TO_CAPITAL]: 20,
-        [QUESTION_TYPES.CAPITAL_TO_COUNTRY]: 20,
-        [QUESTION_TYPES.OUTLINE_TO_COUNTRY]: 10,
-        [QUESTION_TYPES.BORDERS_TO_COUNTRY]: 15,
-        [QUESTION_TYPES.LANDMARK_TO_COUNTRY]: 10
+        [QUESTION_TYPES.COUNTRY_TO_CAPITAL]: 0, // Disabled per user request
+        [QUESTION_TYPES.CAPITAL_TO_COUNTRY]: 0, // Disabled per user request
+        [QUESTION_TYPES.OUTLINE_TO_COUNTRY]: 25, // Using amCharts SVG maps
+        [QUESTION_TYPES.BORDERS_TO_COUNTRY]: 25,
+        [QUESTION_TYPES.LANDMARK_TO_COUNTRY]: 25
     };
 
     // Load country data
     const countriesPath = path.join(__dirname, '..', 'data', 'countries.json');
     let COUNTRIES = [];
+
+    // Helper function to convert country name to amCharts map name
+    function getAmChartsMapName(countryName) {
+        // amCharts naming: country name in lowercase + "Low" (e.g., "afghanistanLow")
+        const nameMap = {
+            'United States': 'usaLow',
+            'United Kingdom': 'unitedKingdomLow',
+            'South Korea': 'southKoreaLow',
+            'North Korea': 'northKoreaLow',
+            'South Africa': 'southAfricaLow',
+            'New Zealand': 'newZealandLow',
+            'Czech Republic': 'czechRepublicLow',
+            'Bosnia and Herzegovina': 'bosniaHerzegovinaLow',
+            'North Macedonia': 'macedoniaLow',
+            'Dominican Republic': 'dominicanRepublicLow',
+            'Costa Rica': 'costaRicaLow',
+            'El Salvador': 'elSalvadorLow',
+            'Puerto Rico': 'puertoRicoLow',
+            'Hong Kong': 'hongKongLow',
+            'Papua New Guinea': 'papuaNewGuineaLow',
+            'Solomon Islands': 'solomonIslandsLow',
+            'Marshall Islands': 'marshallIslandsLow',
+            'Vatican City': 'vaticanCityLow',
+            'San Marino': 'sanMarinoLow',
+            'Saudi Arabia': 'saudiArabiaLow',
+            'United Arab Emirates': 'unitedArabEmiratesLow',
+            'Sri Lanka': 'sriLankaLow',
+            'Ivory Coast': 'ivoryCoastLow'
+        };
+        
+        if (nameMap[countryName]) {
+            return nameMap[countryName];
+        }
+        
+        // Default: remove spaces and make lowercase + "Low"
+        return countryName.toLowerCase().replace(/\s+/g, '') + 'Low';
+    }
 
     try {
         // Try loading comprehensive countries.json first
@@ -75,7 +113,7 @@ module.exports = (client) => {
                     capital: null,
                     capitalAliases: [],
                     borders: flag.borders || [],
-                    outlineUrl: null,
+                    outlineUrl: `https://www.amcharts.com/lib/3/maps/svg/${getAmChartsMapName(flag.name)}.svg`,
                     landmarks: []
                 }));
                 console.log('[Guess the Country] Limited to flag questions only until countries.json is created');
@@ -155,6 +193,27 @@ module.exports = (client) => {
         }
         
         return false;
+    }
+
+    // Check if a URL returns 200 (exists) or 404 (not found)
+    function checkUrlExists(url) {
+        return new Promise((resolve) => {
+            https.get(url, (res) => {
+                if (res.statusCode === 200) {
+                    resolve(true);
+                } else if (res.statusCode === 404) {
+                    console.error(`[Guess the Country] 404 Error: Outline not found at ${url}`);
+                    resolve(false);
+                } else {
+                    console.warn(`[Guess the Country] Unexpected status ${res.statusCode} for ${url}`);
+                    resolve(false);
+                }
+                res.resume(); // Consume response to free up memory
+            }).on('error', (err) => {
+                console.error(`[Guess the Country] Error checking URL ${url}:`, err.message);
+                resolve(false);
+            });
+        });
     }
 
     function selectRandomQuestionType(weights = DEFAULT_WEIGHTS) {
@@ -296,7 +355,12 @@ module.exports = (client) => {
             if (questionType === QUESTION_TYPES.COUNTRY_TO_CAPITAL || questionType === QUESTION_TYPES.CAPITAL_TO_COUNTRY) {
                 valid = candidate.capital !== null && candidate.capital !== '';
             } else if (questionType === QUESTION_TYPES.OUTLINE_TO_COUNTRY) {
-                valid = candidate.outlineUrl !== null;
+                // Check if outline URL exists (not 404)
+                if (candidate.outlineUrl) {
+                    valid = await checkUrlExists(candidate.outlineUrl);
+                } else {
+                    valid = false;
+                }
             } else if (questionType === QUESTION_TYPES.BORDERS_TO_COUNTRY) {
                 // Check that country has borders AND that at least one neighbor exists in our database
                 if (candidate.borders && candidate.borders.length > 0) {
