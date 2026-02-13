@@ -249,12 +249,15 @@ module.exports = (client) => {
                         const svgBuffer = Buffer.concat(chunks);
                         
                         // Convert SVG to PNG using sharp
-                        // Use higher density for better quality and ensure full SVG is rendered
-                        await sharp(svgBuffer, { density: 300 })
+                        // Use 'inside' fit to ensure the entire image fits within bounds and scales proportionally
+                        // Lower density to avoid rendering issues with some SVGs
+                        await sharp(svgBuffer, { density: 150 })
                             .resize(800, 800, { 
-                                fit: 'contain',
+                                fit: 'inside',
+                                withoutEnlargement: false,
                                 background: { r: 255, g: 255, b: 255, alpha: 0 }
                             })
+                            .trim() // Remove any excess transparent borders
                             .png()
                             .toFile(pngPath);
                         
