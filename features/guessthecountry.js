@@ -537,7 +537,7 @@ module.exports = (client) => {
             const args = content.slice(9).trim().split(' ');
             const subcommand = args[0].toLowerCase();
 
-            // ?country get - show current answer
+            // ?country get - show current answer (DM only)
             if (subcommand === 'get') {
                 console.log(`[Guess the Country] ${message.author.tag} used ?country get command - Answer: ${gameState.currentQuestion.correctAnswer}`);
                 const embed = new EmbedBuilder()
@@ -545,7 +545,118 @@ module.exports = (client) => {
                     .setDescription(`**${gameState.currentQuestion.correctAnswer}** ${gameState.currentQuestion.emoji}`)
                     .setColor('#5865F2');
 
-                await message.reply({ embeds: [embed] }).catch(() => {});
+                // Send as DM to keep it private
+                try {
+                    await message.author.send({ embeds: [embed] });
+                    await message.react('✅').catch(() => {});
+                } catch (err) {
+                    console.error(`[Guess the Country] Could not DM ${message.author.tag}:`, err);
+                    await message.reply('❌ Could not send DM. Please check your privacy settings.').catch(() => {});
+                }
+                return;
+            }
+
+            // ?country set [answer] - set the answer without resending question
+            if (subcommand === 'set') {
+                const newAnswer = args.slice(1).join(' ').trim();
+                if (!newAnswer) {
+                    await message.reply('❌ Usage: `?country set <country name>`').catch(() => {});
+                    return;
+                }
+
+                // Find matching country
+                const country = COUNTRIES.find(c => 
+                    normalizeAnswer(c.name) === normalizeAnswer(newAnswer) ||
+                    (c.aliases && c.aliases.some(alias => normalizeAnswer(alias) === normalizeAnswer(newAnswer)))
+                );
+
+                if (!country) {
+                    await message.reply(`❌ Country not found: ${newAnswer}`).catch(() => {});
+                    return;
+                }
+
+                // Update the current answer
+                gameState.currentQuestion.correctAnswer = country.name;
+                gameState.currentQuestion.emoji = country.emoji;
+                gameState.currentQuestion.aliases = country.aliases;
+                gameState.currentQuestion.country = country.name;
+
+                console.log(`[Guess the Country] ${message.author.tag} changed answer to: ${country.name}`);
+                await message.react('✅').catch(() => {});
+                return;
+            }
+
+            // ?country send [code] [type] - manually send a specific question
+            if (subcommand === 'send') {
+                const countryCode = args[1]?.toLowerCase();
+                const questionType = args[2]?.toLowerCase();
+
+                if (!countryCode) {
+                    await message.reply('❌ Usage: `?country send <country_code> [question_type]`\nTypes: flag, capital, capitalto, outline, borders, landmark').catch(() => {});
+                    return;
+                }
+
+                // Find country by code
+                const country = COUNTRIES.find(c => c.code.toLowerCase() === countryCode);
+                if (!country) {
+                    await message.reply(`❌ Country not found with code: ${countryCode}`).catch(() => {});
+                    return;
+                }
+
+                // Determine question type
+                let selectedType = QUESTION_TYPES.FLAG_TO_COUNTRY; // default
+                if (questionType) {
+                    const typeMap = {
+                        'flag': QUESTION_TYPES.FLAG_TO_COUNTRY,
+                        'capital': QUESTION_TYPES.COUNTRY_TO_CAPITAL,
+                        'capitalto': QUESTION_TYPES.CAPITAL_TO_COUNTRY,
+                        'outline': QUESTION_TYPES.OUTLINE_TO_COUNTRY,
+                        'borders': QUESTION_TYPES.BORDERS_TO_COUNTRY,
+                        'landmark': QUESTION_TYPES.LANDMARK_TO_COUNTRY
+                    };
+                    selectedType = typeMap[questionType] || QUESTION_TYPES.FLAG_TO_COUNTRY;
+                }
+
+                // Generate and send the question
+                console.log(`[Guess the Country] ${message.author.tag} manually sending ${selectedType} question for ${country.name}`);
+                
+                const question = await generateQuestion(selectedType, country);
+                if (!question || !question.title) {
+                    await message.reply('❌ Failed to generate question for this country/type combination.').catch(() => {});
+                    return;
+                }
+
+                // Update game state
+                gameState.currentQuestion = question;
+                gameState.votes = {};
+                gameState.voters = new Set();
+                gameState.isTransitioning = false;
+                gameState.roundStartTime = Date.now();
+
+                const embed = new EmbedBuilder()
+                    .setTitle(gameState.currentQuestion.title)
+                    .setDescription(
+                        (gameState.currentQuestion.description || '') +
+                        '\n\n**How to play:**\n• Type `!` followed by your answer (e.g., `!France`)\n• Type `?` to skip (-1 point, 1 min cooldown)'
+                    )
+                    .setColor('#5865F2')
+                    .setFooter({ text: 'First to guess correctly wins!' });
+
+                if (gameState.currentQuestion.imageUrl) {
+                    embed.setImage(gameState.currentQuestion.imageUrl);
+                }
+
+                // Send with attachment if it's an outline question with a file
+                const messageOptions = { embeds: [embed] };
+                if (gameState.currentQuestion.filePath && gameState.currentQuestion.fileAttachmentName) {
+                    const attachment = new AttachmentBuilder(gameState.currentQuestion.filePath, { 
+                        name: gameState.currentQuestion.fileAttachmentName 
+                    });
+                    messageOptions.files = [attachment];
+                }
+
+                await message.channel.send(messageOptions);
+                await message.react('✅').catch(() => {});
                 return;
             }
 
