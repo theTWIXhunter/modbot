@@ -148,6 +148,16 @@ module.exports = {
               description: 'Better Falix extension issues'
             },
             {
+              label: 'LockedChests Plugin',
+              value: 'lockedchests-plugin',
+              description: 'LockedChests plugin issues'
+            },
+            {
+              label: 'Lifesteal Plugin',
+              value: 'lifesteal-plugin',
+              description: 'Lifesteal plugin issues'
+            },
+            {
               label: 'General/Other',
               value: 'general-other',
               description: 'Other products or general questions'
@@ -286,6 +296,8 @@ module.exports = {
         'discordauth-plugin': 'DCAuth',
         'modbot-bot': 'ModBot',
         'better-falix-webextension': 'BetterFalix',
+        'lockedchests-plugin': 'LockedChests',
+        'lifesteal-plugin': 'Lifesteal',
         'general-other': 'General'
       };
 

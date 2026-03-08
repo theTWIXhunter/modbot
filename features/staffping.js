@@ -52,6 +52,12 @@ module.exports = (client) => {
       // Exception: Allow moderators to ping staff without triggering the response
       if (message.member?.roles.cache.has(MODERATOR_ROLE_ID)) return;
 
+      // Don't respond to role pings (only respond to direct user pings)
+      if (message.mentions.roles.size > 0 && !message.content.includes(`<@${STAFF_USER_ID}>`)) return;
+
+      // Don't respond when the staff ping is just a reply
+      if (message.reference) return;
+
       // Track pings per user per guild
       const guildId = message.guild.id;
       if (!pingTracker.has(guildId)) pingTracker.set(guildId, new Map());
