@@ -119,9 +119,9 @@ module.exports = (client) => {
           console.log('BASICS.JS: Server started message detected');
           restartMessageIds.started = message;
 
-          // All three messages detected, schedule deletion after 54 minutes
+          // All three messages detected, schedule deletion after 5 minutes
           if (restartMessageIds.restart && restartMessageIds.stopped && restartMessageIds.started) {
-            console.log('BASICS.JS: All three restart messages detected, scheduling deletion in 54 minutes');
+            console.log('BASICS.JS: All three restart messages detected, scheduling deletion in 5 minutes');
             
             setTimeout(async () => {
               try {
@@ -156,7 +156,7 @@ module.exports = (client) => {
               } catch (error) {
                 console.error('BASICS.JS: Error during restart message deletion:', error);
               }
-            }, 54 * 60 * 1000); // 54 minutes in milliseconds
+            }, 5 * 60 * 1000); // 5 minutes in milliseconds
           }
           return;
         }
