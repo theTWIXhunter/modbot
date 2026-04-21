@@ -86,7 +86,85 @@ module.exports = (client) => {
     await assignAutoRole(member);
   });
 
+  // Daily restart message tracking
+  const INTERACTIVE_CHAT_ID = '1323219960134238249';
+  const RESTART_BOT_ID = '1322155826705600602';
+  
+  let restartMessageIds = {
+    restart: null,
+    stopped: null,
+    started: null
+  };
+
   client.on('messageCreate', async (message) => {
+    // Handle daily restart message cleanup (separate from botFilter)
+    if (message.channel.id === INTERACTIVE_CHAT_ID && message.author.id === RESTART_BOT_ID) {
+      try {
+        // Detect the restart notification
+        if (message.content.includes('Daily restart, Please try again in a few minutes')) {
+          console.log('BASICS.JS: Daily restart message detected');
+          restartMessageIds.restart = message;
+          return;
+        }
+
+        // Detect the server stopped message
+        if (message.embeds.length > 0 && message.embeds[0].description?.includes('**Server has stopped**')) {
+          console.log('BASICS.JS: Server stopped message detected');
+          restartMessageIds.stopped = message;
+          return;
+        }
+
+        // Detect the server started message
+        if (message.embeds.length > 0 && message.embeds[0].description?.includes('**Server has started**')) {
+          console.log('BASICS.JS: Server started message detected');
+          restartMessageIds.started = message;
+
+          // All three messages detected, schedule deletion after 54 minutes
+          if (restartMessageIds.restart && restartMessageIds.stopped && restartMessageIds.started) {
+            console.log('BASICS.JS: All three restart messages detected, scheduling deletion in 54 minutes');
+            
+            setTimeout(async () => {
+              try {
+                // Delete all three messages
+                if (restartMessageIds.restart && !restartMessageIds.restart.deleted) {
+                  await restartMessageIds.restart.delete().catch(e => 
+                    console.error('BASICS.JS: Failed to delete restart message:', e)
+                  );
+                  console.log('BASICS.JS: Deleted restart message');
+                }
+                
+                if (restartMessageIds.stopped && !restartMessageIds.stopped.deleted) {
+                  await restartMessageIds.stopped.delete().catch(e => 
+                    console.error('BASICS.JS: Failed to delete stopped message:', e)
+                  );
+                  console.log('BASICS.JS: Deleted stopped message');
+                }
+                
+                if (restartMessageIds.started && !restartMessageIds.started.deleted) {
+                  await restartMessageIds.started.delete().catch(e => 
+                    console.error('BASICS.JS: Failed to delete started message:', e)
+                  );
+                  console.log('BASICS.JS: Deleted started message');
+                }
+
+                // Reset tracking
+                restartMessageIds = {
+                  restart: null,
+                  stopped: null,
+                  started: null
+                };
+              } catch (error) {
+                console.error('BASICS.JS: Error during restart message deletion:', error);
+              }
+            }, 54 * 60 * 1000); // 54 minutes in milliseconds
+          }
+          return;
+        }
+      } catch (error) {
+        console.error('BASICS.JS: Error handling daily restart messages:', error);
+      }
+    }
+
     if (message.author.bot) return;
     
     // Auto-role: Check and assign role to existing users when they send messages
