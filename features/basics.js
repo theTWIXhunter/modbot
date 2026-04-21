@@ -108,14 +108,14 @@ module.exports = (client) => {
         }
 
         // Detect the server stopped message
-        if (message.embeds.length > 0 && message.embeds[0].description?.includes('**Server has stopped**')) {
+        if (message.content.includes('**Server has stopped**')) {
           console.log('BASICS.JS: Server stopped message detected');
           restartMessageIds.stopped = message;
           return;
         }
 
         // Detect the server started message
-        if (message.embeds.length > 0 && message.embeds[0].description?.includes('**Server has started**')) {
+        if (message.content.includes('**Server has started**')) {
           console.log('BASICS.JS: Server started message detected');
           restartMessageIds.started = message;
 
