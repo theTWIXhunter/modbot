@@ -92,7 +92,18 @@ async function isValidCity(city) {
 
     try {
       const res = await fetch(url);
-      const data = await res.json();
+      const rawBody = await res.text();
+
+      console.log(`CITIESCHAIN.JS: Geonames response for "${city}" (${lang}) [status ${res.status}]`);
+      console.log(`CITIESCHAIN.JS: Geonames raw body for "${city}" (${lang}): ${rawBody}`);
+
+      let data;
+      try {
+        data = JSON.parse(rawBody);
+      } catch (parseErr) {
+        console.error(`CITIESCHAIN.JS: Failed to parse Geonames response for "${city}" (${lang}):`, parseErr);
+        continue;
+      }
 
       if (!data.geonames || data.geonames.length === 0) continue;
 
