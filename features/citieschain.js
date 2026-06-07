@@ -79,7 +79,6 @@ function resetGame() {
   gameState.lastUserId = null;
   gameState.usedCities = [];
   gameState.streak = 0;
-  gameState.lastLetter = null;
   saveState();
 }
 
