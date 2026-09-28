@@ -88,76 +88,49 @@ module.exports = (client) => {
 
   // Daily restart message tracking
   const INTERACTIVE_CHAT_ID = '1323219960134238249';
-  const RESTART_BOT_ID = '1322155826705600602';
+  const RESTART_BOT_ID = '1552450528611532820';
+  const RESTART_START_MESSAGE = 'Daily restart started';
+  const RESTART_COMPLETED_MESSAGE = 'Restart completed';
+  const RESTART_MAX_INTERVAL_MS = 10 * 60 * 1000;
   
-  let restartMessageIds = {
-    restart: null,
-    stopped: null,
-    started: null
-  };
+  let restartInterval = null;
 
   client.on('messageCreate', async (message) => {
     // Handle daily restart message cleanup (separate from botFilter)
     if (message.channel.id === INTERACTIVE_CHAT_ID && message.author.id === RESTART_BOT_ID) {
       try {
-        // Detect the restart notification
-        if (message.content.includes('Daily restart, Please try again in a few minutes')) {
-          console.log('BASICS.JS: Daily restart message detected');
-          restartMessageIds.restart = message;
+        if (message.content === RESTART_START_MESSAGE) {
+          console.log('BASICS.JS: Daily restart start detected');
+          restartInterval = {
+            startTimestamp: message.createdTimestamp,
+            messages: [message]
+          };
           return;
         }
 
-        // Detect the server stopped message
-        if (message.content.includes('**Server has stopped**')) {
-          console.log('BASICS.JS: Server stopped message detected');
-          restartMessageIds.stopped = message;
-          return;
+        if (!restartInterval) return;
+
+        if (message.createdTimestamp >= restartInterval.startTimestamp) {
+          restartInterval.messages.push(message);
         }
 
-        // Detect the server started message
-        if (message.content.includes('**Server has started**')) {
-          console.log('BASICS.JS: Server started message detected');
-          restartMessageIds.started = message;
+        if (message.content === RESTART_COMPLETED_MESSAGE) {
+          const restartDuration = message.createdTimestamp - restartInterval.startTimestamp;
 
-          // All three messages detected, schedule deletion after 5 minutes
-          if (restartMessageIds.restart && restartMessageIds.stopped && restartMessageIds.started) {
-            console.log('BASICS.JS: All three restart messages detected, scheduling deletion in 5 minutes');
-            
-            setTimeout(async () => {
-              try {
-                // Delete all three messages
-                if (restartMessageIds.restart && !restartMessageIds.restart.deleted) {
-                  await restartMessageIds.restart.delete().catch(e => 
-                    console.error('BASICS.JS: Failed to delete restart message:', e)
-                  );
-                  console.log('BASICS.JS: Deleted restart message');
-                }
-                
-                if (restartMessageIds.stopped && !restartMessageIds.stopped.deleted) {
-                  await restartMessageIds.stopped.delete().catch(e => 
-                    console.error('BASICS.JS: Failed to delete stopped message:', e)
-                  );
-                  console.log('BASICS.JS: Deleted stopped message');
-                }
-                
-                if (restartMessageIds.started && !restartMessageIds.started.deleted) {
-                  await restartMessageIds.started.delete().catch(e => 
-                    console.error('BASICS.JS: Failed to delete started message:', e)
-                  );
-                  console.log('BASICS.JS: Deleted started message');
-                }
-
-                // Reset tracking
-                restartMessageIds = {
-                  restart: null,
-                  stopped: null,
-                  started: null
-                };
-              } catch (error) {
-                console.error('BASICS.JS: Error during restart message deletion:', error);
+          if (restartDuration >= 0 && restartDuration <= RESTART_MAX_INTERVAL_MS) {
+            for (const restartMessage of restartInterval.messages) {
+              if (restartMessage && !restartMessage.deleted) {
+                await restartMessage.delete().catch((error) => {
+                  console.error('BASICS.JS: Failed to delete restart interval message:', error);
+                });
               }
-            }, 5 * 60 * 1000); // 5 minutes in milliseconds
+            }
+            console.log('BASICS.JS: Restart interval messages deleted');
+          } else {
+            console.log('BASICS.JS: Restart interval exceeded 10 minutes, skipping deletion');
           }
+
+          restartInterval = null;
           return;
         }
       } catch (error) {
@@ -179,7 +152,6 @@ module.exports = (client) => {
     }
   });
 };
-
 
 
 
