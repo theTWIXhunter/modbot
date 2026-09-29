@@ -89,8 +89,8 @@ module.exports = (client) => {
   // Daily restart message tracking
   const INTERACTIVE_CHAT_ID = '1323219960134238249';
   const RESTART_BOT_ID = '1552450528611532820';
-  const RESTART_START_MESSAGE = 'Daily restart started';
-  const RESTART_COMPLETED_MESSAGE = 'Restart completed';
+  const RESTART_START_MESSAGE = 'Daily Restart started -# \[PROD\] Minecraft Bimsem · Daily Restart';
+  const RESTART_COMPLETED_MESSAGE = 'Restart completed -# \[PROD\] Minecraft Bimsem · Daily Restart';
   const RESTART_MAX_INTERVAL_MS = 10 * 60 * 1000;
   
   let restartInterval = null;
