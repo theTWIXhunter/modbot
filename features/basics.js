@@ -104,7 +104,7 @@ module.exports = (client) => {
         data.content,
         ...getComponentText(component.components || data.components)
       ].filter(Boolean);
-    });
+    }).filter((text, index, texts) => texts.indexOf(text) === index);
   }
 
   function isRestartMessage(message, mainText) {
@@ -115,10 +115,12 @@ module.exports = (client) => {
     ));
     const componentText = getComponentText(message.components)
       .join('\n')
+      .replace(/\\\[/g, '[')
       .replace(/\s+/g, ' ')
       .trim();
     console.log('BASICS.JS: Restart component text:', componentText);
-    const isComponentRestartMessage = componentText === `${mainText} -# ${RESTART_FOOTER}`;
+    const isComponentRestartMessage = componentText.includes(mainText) &&
+      componentText.includes(RESTART_FOOTER);
 
     const legacyContent = mainText === RESTART_START_MESSAGE
       ? RESTART_START_CONTENT
