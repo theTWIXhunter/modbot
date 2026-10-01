@@ -97,10 +97,14 @@ module.exports = (client) => {
   const RESTART_MAX_INTERVAL_MS = 10 * 60 * 1000;
 
   function getComponentText(components = []) {
-    return components.flatMap((component) => [
-      component.content,
-      ...getComponentText(component.components)
-    ]).filter(Boolean);
+    return components.flatMap((component) => {
+      const data = component.data || {};
+      return [
+        component.content,
+        data.content,
+        ...getComponentText(component.components || data.components)
+      ].filter(Boolean);
+    });
   }
 
   function isRestartMessage(message, mainText) {
@@ -113,6 +117,7 @@ module.exports = (client) => {
       .join('\n')
       .replace(/\s+/g, ' ')
       .trim();
+    console.log('BASICS.JS: Restart component text:', componentText);
     const isComponentRestartMessage = componentText === `${mainText} -# ${RESTART_FOOTER}`;
 
     const legacyContent = mainText === RESTART_START_MESSAGE
