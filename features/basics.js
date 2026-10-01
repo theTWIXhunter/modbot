@@ -96,8 +96,8 @@ module.exports = (client) => {
 
   function isRestartMessage(message, mainText) {
     return message.embeds.some((embed) => (
-      embed.description === mainText &&
-      embed.footer?.text === RESTART_FOOTER
+      (embed.title === mainText || embed.description === mainText) &&
+      embed.footer?.text?.replace(/^-#\s*/, '').trim() === RESTART_FOOTER
     ));
   }
   
@@ -123,6 +123,7 @@ module.exports = (client) => {
         }
 
         if (isRestartMessage(message, RESTART_COMPLETED_MESSAGE)) {
+          console.log('BASICS.JS: Daily restart stop detected');
           const restartDuration = message.createdTimestamp - restartInterval.startTimestamp;
 
           if (restartDuration >= 0 && restartDuration <= RESTART_MAX_INTERVAL_MS) {
