@@ -102,7 +102,8 @@ module.exports = (client) => {
       return [
         component.content,
         data.content,
-        ...getComponentText(component.components || data.components)
+        ...getComponentText(component.components),
+        ...getComponentText(data.components)
       ].filter(Boolean);
     }).filter((text, index, texts) => texts.indexOf(text) === index);
   }
@@ -142,7 +143,9 @@ module.exports = (client) => {
           raw: typeof message.toJSON === 'function' ? message.toJSON() : message
         });
 
-        if (isRestartMessage(message, RESTART_START_MESSAGE)) {
+        const isStartMessage = isRestartMessage(message, RESTART_START_MESSAGE);
+        console.log('BASICS.JS: Restart start match:', isStartMessage);
+        if (isStartMessage) {
           console.log('BASICS.JS: Daily restart start detected');
           restartInterval = {
             startTimestamp: message.createdTimestamp,
@@ -157,7 +160,9 @@ module.exports = (client) => {
           restartInterval.messages.push(message);
         }
 
-        if (isRestartMessage(message, RESTART_COMPLETED_MESSAGE)) {
+        const isCompletedMessage = isRestartMessage(message, RESTART_COMPLETED_MESSAGE);
+        console.log('BASICS.JS: Restart stop match:', isCompletedMessage);
+        if (isCompletedMessage) {
           console.log('BASICS.JS: Daily restart stop detected');
           const restartDuration = message.createdTimestamp - restartInterval.startTimestamp;
 
