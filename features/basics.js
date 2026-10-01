@@ -89,9 +89,17 @@ module.exports = (client) => {
   // Daily restart message tracking
   const INTERACTIVE_CHAT_ID = '1323219960134238249';
   const RESTART_BOT_ID = '1552450528611532820';
-  const RESTART_START_MESSAGE = 'Daily Restart started -# \[PROD\] Minecraft Bimsem · Daily Restart';
-  const RESTART_COMPLETED_MESSAGE = 'Restart completed -# \[PROD\] Minecraft Bimsem · Daily Restart';
+  const RESTART_FOOTER = '[PROD] Minecraft Bimsem · Daily Restart';
+  const RESTART_START_MESSAGE = 'Daily Restart started';
+  const RESTART_COMPLETED_MESSAGE = 'Restart completed';
   const RESTART_MAX_INTERVAL_MS = 10 * 60 * 1000;
+
+  function isRestartMessage(message, mainText) {
+    return message.embeds.some((embed) => (
+      embed.description === mainText &&
+      embed.footer?.text === RESTART_FOOTER
+    ));
+  }
   
   let restartInterval = null;
 
@@ -99,7 +107,7 @@ module.exports = (client) => {
     // Handle daily restart message cleanup (separate from botFilter)
     if (message.channel.id === INTERACTIVE_CHAT_ID && message.author.id === RESTART_BOT_ID) {
       try {
-        if (message.content === RESTART_START_MESSAGE) {
+        if (isRestartMessage(message, RESTART_START_MESSAGE)) {
           console.log('BASICS.JS: Daily restart start detected');
           restartInterval = {
             startTimestamp: message.createdTimestamp,
@@ -114,7 +122,7 @@ module.exports = (client) => {
           restartInterval.messages.push(message);
         }
 
-        if (message.content === RESTART_COMPLETED_MESSAGE) {
+        if (isRestartMessage(message, RESTART_COMPLETED_MESSAGE)) {
           const restartDuration = message.createdTimestamp - restartInterval.startTimestamp;
 
           if (restartDuration >= 0 && restartDuration <= RESTART_MAX_INTERVAL_MS) {
