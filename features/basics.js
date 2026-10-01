@@ -96,18 +96,30 @@ module.exports = (client) => {
   const RESTART_COMPLETED_CONTENT = 'Restart completed -# \[PROD\] Minecraft Bimsem · Daily Restart';
   const RESTART_MAX_INTERVAL_MS = 10 * 60 * 1000;
 
+  function getComponentText(components = []) {
+    return components.flatMap((component) => [
+      component.content,
+      ...getComponentText(component.components)
+    ]).filter(Boolean);
+  }
+
   function isRestartMessage(message, mainText) {
     const embeds = Array.isArray(message.embeds) ? message.embeds : [];
     const isEmbedRestartMessage = embeds.some((embed) => (
       (embed.title === mainText || embed.description === mainText) &&
       embed.footer?.text?.replace(/^-#\s*/, '').trim() === RESTART_FOOTER
     ));
+    const componentText = getComponentText(message.components)
+      .join('\n')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const isComponentRestartMessage = componentText === `${mainText} -# ${RESTART_FOOTER}`;
 
     const legacyContent = mainText === RESTART_START_MESSAGE
       ? RESTART_START_CONTENT
       : RESTART_COMPLETED_CONTENT;
 
-    return isEmbedRestartMessage || message.content === legacyContent;
+    return isEmbedRestartMessage || isComponentRestartMessage || message.content === legacyContent;
   }
   
   let restartInterval = null;
@@ -118,7 +130,9 @@ module.exports = (client) => {
       try {
         console.log('BASICS.JS: Checking daily restart message:', {
           content: message.content,
-          embeds: message.embeds
+          embeds: message.embeds,
+          components: message.components,
+          raw: typeof message.toJSON === 'function' ? message.toJSON() : message
         });
 
         if (isRestartMessage(message, RESTART_START_MESSAGE)) {
