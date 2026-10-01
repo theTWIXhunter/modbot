@@ -116,7 +116,7 @@ module.exports = (client) => {
     ));
     const componentText = getComponentText(message.components)
       .join('\n')
-      .replace(/\\\[/g, '[')
+      .replace(/\\([\[\]])/g, '$1')
       .replace(/\s+/g, ' ')
       .trim();
     console.log('BASICS.JS: Restart component text:', componentText);
