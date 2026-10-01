@@ -116,6 +116,11 @@ module.exports = (client) => {
     // Handle daily restart message cleanup (separate from botFilter)
     if (message.channel.id === INTERACTIVE_CHAT_ID && message.author.id === RESTART_BOT_ID) {
       try {
+        console.log('BASICS.JS: Checking daily restart message:', {
+          content: message.content,
+          embeds: message.embeds
+        });
+
         if (isRestartMessage(message, RESTART_START_MESSAGE)) {
           console.log('BASICS.JS: Daily restart start detected');
           restartInterval = {
