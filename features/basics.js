@@ -95,10 +95,13 @@ module.exports = (client) => {
   const RESTART_MAX_INTERVAL_MS = 10 * 60 * 1000;
 
   function isRestartMessage(message, mainText) {
-    return message.embeds.some((embed) => (
+    const embeds = Array.isArray(message.embeds) ? message.embeds : [];
+    const isEmbedRestartMessage = embeds.some((embed) => (
       (embed.title === mainText || embed.description === mainText) &&
       embed.footer?.text?.replace(/^-#\s*/, '').trim() === RESTART_FOOTER
     ));
+
+    return isEmbedRestartMessage || message.content === `${mainText} -# ${RESTART_FOOTER}`;
   }
   
   let restartInterval = null;
