@@ -92,6 +92,8 @@ module.exports = (client) => {
   const RESTART_FOOTER = '[PROD] Minecraft Bimsem · Daily Restart';
   const RESTART_START_MESSAGE = 'Daily Restart started';
   const RESTART_COMPLETED_MESSAGE = 'Restart completed';
+  const RESTART_START_CONTENT = 'Daily Restart started -# \[PROD\] Minecraft Bimsem · Daily Restart';
+  const RESTART_COMPLETED_CONTENT = 'Restart completed -# \[PROD\] Minecraft Bimsem · Daily Restart';
   const RESTART_MAX_INTERVAL_MS = 10 * 60 * 1000;
 
   function isRestartMessage(message, mainText) {
@@ -101,7 +103,11 @@ module.exports = (client) => {
       embed.footer?.text?.replace(/^-#\s*/, '').trim() === RESTART_FOOTER
     ));
 
-    return isEmbedRestartMessage || message.content === `${mainText} -# ${RESTART_FOOTER}`;
+    const legacyContent = mainText === RESTART_START_MESSAGE
+      ? RESTART_START_CONTENT
+      : RESTART_COMPLETED_CONTENT;
+
+    return isEmbedRestartMessage || message.content === legacyContent;
   }
   
   let restartInterval = null;
